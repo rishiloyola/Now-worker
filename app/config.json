@@ -1,0 +1,17 @@
+{
+	"appbase": {
+ 		"hostname" : "scalr.api.appbase.io",
+ 		"appname" : "Check In",
+ 		"username" : "XXXX",
+ 		"password" : "XXXX"
+	},
+	"twitter": {
+ 		"consumer_key" : "XXXX",
+ 		"consumer_secret" : "XXXX",
+ 		"access_token" : "XXXX",
+ 		"access_token_secret" : "XXXX"
+	},
+	"foursquare": {
+		"oauth_token" : "XXXX"
+	}
+}
