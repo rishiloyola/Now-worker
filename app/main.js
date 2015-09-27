@@ -23,20 +23,19 @@ var T = new Twit({
       access_token_secret: jsonContent.twitter.access_token_secret
   });
   
+//Filter tweets related to swarmapp
+var stream = T.stream('statuses/filter', { track: 'swarmapp', language: 'en' });
   
 var client = new elasticsearch.Client({
       host: 'https://'+USERNAME+":"+PASSWORD+"@"+HOSTNAME,
   });
-  
-  
-//Filter tweets related to swarmapp
-var stream = T.stream('statuses/filter', { track: 'swarmapp', language: 'en' });
 
 
 //Streaming of twitter tweets
 stream.on('tweet', function (tweet) {
-  if(tweet && tweet.entities && tweet.entities.urls[0] && tweet.entities.urls[0].display_url){
-    try{
+  
+  if(verifyTweets(tweet)){
+    
         //swarmapp url of the check in
         var swarmappUrl = tweet.entities.urls[0].display_url;
         //extracting id from that url
@@ -46,49 +45,82 @@ stream.on('tweet', function (tweet) {
         
         //Getting data from foursquare
         request(FSurl, function(error, response, body) {
-          var parsedbody = JSON.parse(body);
-          
-          if(parsedbody.meta.code==200){
+          try{
             
-            if(parsedbody.response && parsedbody.response.checkin && parsedbody.response.checkin.venue && parsedbody.response.checkin.venue.location.city && parsedbody.response.checkin.venue.categories[0] && parsedbody.response.checkin.venue.categories[0].shortName && parsedbody.response.checkin.venue.name && parsedbody.response.checkin.shout){
+            if(verifyFoursquare(body,error)){
               
-              var cityDetails = String(parsedbody.response.checkin.venue.location.city);
-              //Storing data using appbase api
-              client.index({
-                index: 'Check In',
-                type: 'city',
-                id: parsedbody.response.checkin.id,
-                body: {
-                  shout: parsedbody.response.checkin.shout,
-                  city: cityDetails,
-                  category: parsedbody.response.checkin.venue.categories[0].shortName,
-                  latitude: parsedbody.response.checkin.venue.location.lat,
-                  longitude: parsedbody.response.checkin.venue.location.lng,
-                  venue: parsedbody.response.checkin.venue.name,
-                  city_suggest: cityDetails,
-                  url: swarmappUrl,
-                  response: body
-                }
-              }).then(function(response) {
+              var parsedbody = JSON.parse(body);
+
+              if(parsedbody.meta.code==200){
                 
-                console.log(cityDetails);
-                console.log(response);
+                var cityDetails = String(parsedbody.response.checkin.venue.location.city);
               
-              }, function(error) {
-                
-                console.log(error);
-              
-              });
+                //Storing data using appbase api
+                client.index({
+                  index: 'Check In',
+                  type: 'city',
+                  id: parsedbody.response.checkin.id,
+                  body: {
+                     shout: parsedbody.response.checkin.shout,
+                     city: cityDetails,
+                     category: parsedbody.response.checkin.venue.categories[0].shortName,
+                     latitude: parsedbody.response.checkin.venue.location.lat,
+                     longitude: parsedbody.response.checkin.venue.location.lng,
+                     venue: parsedbody.response.checkin.venue.name,
+                     city_suggest: cityDetails,
+                     url: swarmappUrl,
+                     response: body
+                  }
+                }).then(function(response) {
+                     console.log(cityDetails);
+                     console.log(response);
+                }, function(error) {
+                     console.log(error);
+                });
+              }
+            
             }
+          
+          }catch(error){
+           console.log(error);
           }
-        });
-        
-      }catch(error){
-       
-        console.log("an error occurred "+error);
-      
-      } 
+      });
     }
 });
 
+
+function verifyTweets(tweet){
+  if(tweet){
+    if(tweet.entities){
+      if(tweet.entities.urls[0]){
+        if(tweet.entities.urls[0].display_url){
+          return true;
+        }
+      }
+    }
+  }
+}
+function verifyFoursquare(fsdata,error){
+  if(fsdata && !error){
+      var parsedbody = JSON.parse(fsdata);
+      if(parsedbody.response){
+        if(parsedbody.response.checkin){
+          if(parsedbody.response.checkin.venue){
+            if(parsedbody.response.checkin.venue.location.city){
+              if(parsedbody.response.checkin.venue.categories[0]){
+                if(parsedbody.response.checkin.venue.categories[0].shortName){
+                  if(parsedbody.response.checkin.venue.name){
+                    if(parsedbody.response.checkin.shout){
+                      return true;
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  return false;  
+}
 
