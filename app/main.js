@@ -50,7 +50,7 @@ stream.on('tweet', function (tweet) {
           
           if(parsedbody.meta.code==200){
             
-            if(parsedbody.response.checkin.venue.location.city && parsedbody.response.checkin.venue.categories[0].shortName && parsedbody.response.checkin.venue.name && parsedbody.response.checkin.shout){
+            if(parsedbody.response && parsedbody.response.checkin && parsedbody.response.checkin.venue && parsedbody.response.checkin.venue.location.city && parsedbody.response.checkin.venue.categories[0] && parsedbody.response.checkin.venue.categories[0].shortName && parsedbody.response.checkin.venue.name && parsedbody.response.checkin.shout){
               
               var cityDetails = String(parsedbody.response.checkin.venue.location.city);
               //Storing data using appbase api
@@ -65,8 +65,9 @@ stream.on('tweet', function (tweet) {
                   latitude: parsedbody.response.checkin.venue.location.lat,
                   longitude: parsedbody.response.checkin.venue.location.lng,
                   venue: parsedbody.response.checkin.venue.name,
-                  query_suggest: cityDetails,
-                  url: swarmappUrl
+                  city_suggest: cityDetails,
+                  url: swarmappUrl,
+                  response: body
                 }
               }).then(function(response) {
                 
