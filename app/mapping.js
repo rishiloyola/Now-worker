@@ -22,7 +22,7 @@ var client = new elasticsearch.Client({
     type: 'city',
     body: {
         properties:{
-          query_suggest : {
+          city_suggest : {
           "type" : "completion"
         }
       }
