@@ -24,6 +24,11 @@ var client = new elasticsearch.Client({
         properties:{
           city_suggest : {
           "type" : "completion"
+        },
+        city : {
+          "type" : "string",
+          "index" : "not_analyzed",
+          "doc_values": true 
         }
       }
     }
