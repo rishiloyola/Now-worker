@@ -1,0 +1,25 @@
+{
+  "name": "CheckedIn-Worker",
+  "version": "0.0.1",
+  "homepage": "https://github.com/rishiloyola/CheckedIn-Worker",
+  "authors": [
+    "Rishi Shah",
+    "Siddharth Kothari"
+  ],
+  "description": "realtime foursquare checkins",
+  "main": "main.js",
+  "keywords": [
+    "foursquare",
+    "checkins",
+    "elasticsearch",
+    "appbase",
+    "twitter"
+  ],
+  "devDependencies": {
+    "twit": "~2.1.0",
+    "appbase-js": "~0.1.0",
+    "request": "~2.62.0",
+    "elasticsearch": "~8.2.0"    
+  },
+  "license": "MIT"
+}
