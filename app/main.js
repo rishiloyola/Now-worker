@@ -35,7 +35,6 @@ var client = new elasticsearch.Client({
 stream.on('tweet', function (tweet) {
   
   if(verifyTweets(tweet)){
-    
         //swarmapp url of the check in
         var swarmappUrl = tweet.entities.urls[0].display_url;
         //extracting id from that url
@@ -54,11 +53,11 @@ stream.on('tweet', function (tweet) {
               if(parsedbody.meta.code==200){
                 
                 var cityDetails = String(parsedbody.response.checkin.venue.location.city);
-              
                 //Storing data using appbase api
                 client.index({
                   index: 'Check In',
                   type: 'city',
+                  size: 200,
                   id: parsedbody.response.checkin.id,
                   body: {
                      shout: parsedbody.response.checkin.shout,
@@ -69,7 +68,8 @@ stream.on('tweet', function (tweet) {
                      venue: parsedbody.response.checkin.venue.name,
                      city_suggest: cityDetails,
                      url: swarmappUrl,
-                     response: body
+                     username: parsedbody.response.checkin.user.firstName,
+                     photourl: parsedbody.response.checkin.user.photo.prefix+"50x50"+parsedbody.response.checkin.user.photo.suffix
                   }
                 }).then(function(response) {
                      console.log(cityDetails);
@@ -100,18 +100,22 @@ function verifyTweets(tweet){
     }
   }
 }
+
+
 function verifyFoursquare(fsdata,error){
   if(fsdata && !error){
       var parsedbody = JSON.parse(fsdata);
       if(parsedbody.response){
         if(parsedbody.response.checkin){
-          if(parsedbody.response.checkin.venue){
-            if(parsedbody.response.checkin.venue.location.city){
+          if(parsedbody.response.checkin.venue && parsedbody.response.checkin.user){
+            if(parsedbody.response.checkin.venue.location.city && parsedbody.response.checkin.user.firstName){
               if(parsedbody.response.checkin.venue.categories[0]){
                 if(parsedbody.response.checkin.venue.categories[0].shortName){
                   if(parsedbody.response.checkin.venue.name){
                     if(parsedbody.response.checkin.shout){
-                      return true;
+                      if(parsedbody.response.checkin.user.photo.prefix && parsedbody.response.checkin.user.photo.suffix){
+                        return true;
+                      }
                     }
                   }
                 }
