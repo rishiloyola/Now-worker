@@ -69,7 +69,9 @@ stream.on('tweet', function (tweet) {
                      city_suggest: cityDetails,
                      url: swarmappUrl,
                      username: parsedbody.response.checkin.user.firstName,
-                     photourl: parsedbody.response.checkin.user.photo.prefix+"50x50"+parsedbody.response.checkin.user.photo.suffix
+                     photourl: parsedbody.response.checkin.user.photo.prefix+"50x50"+parsedbody.response.checkin.user.photo.suffix,
+                     state: parsedbody.response.checkin.venue.location.state,
+                     country: parsedbody.response.checkin.venue.location.country
                   }
                 }).then(function(response) {
                      console.log(cityDetails);
@@ -108,7 +110,7 @@ function verifyFoursquare(fsdata,error){
       if(parsedbody.response){
         if(parsedbody.response.checkin){
           if(parsedbody.response.checkin.venue && parsedbody.response.checkin.user){
-            if(parsedbody.response.checkin.venue.location.city && parsedbody.response.checkin.user.firstName){
+            if(parsedbody.response.checkin.venue.location.city && parsedbody.response.checkin.user.firstName && parsedbody.response.checkin.venue.location.state && parsedbody.response.checkin.venue.location.country){
               if(parsedbody.response.checkin.venue.categories[0]){
                 if(parsedbody.response.checkin.venue.categories[0].shortName){
                   if(parsedbody.response.checkin.venue.name){
