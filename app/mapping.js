@@ -18,7 +18,7 @@ var client = new elasticsearch.Client({
   });
 
  client.indices.putMapping({
-    index: 'Check In',
+    index: 'checkin',
     type: 'city',
     body: {
         properties:{
@@ -29,7 +29,10 @@ var client = new elasticsearch.Client({
           "type" : "string",
           "index" : "not_analyzed",
           "doc_values": true 
-        }
+        },
+        location : {
+          "type" : "geo_point"
+         }
       }
     }
     }).then(function(response) {
