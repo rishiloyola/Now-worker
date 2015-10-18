@@ -22,9 +22,11 @@ var T = new Twit({
       access_token: jsonContent.twitter.access_token,     
       access_token_secret: jsonContent.twitter.access_token_secret
   });
+
   
 //Filter tweets related to swarmapp
 var stream = T.stream('statuses/filter', { track: 'swarmapp', language: 'en' });
+
   
 var client = new elasticsearch.Client({
       host: 'https://'+USERNAME+":"+PASSWORD+"@"+HOSTNAME,
@@ -47,15 +49,13 @@ stream.on('tweet', function (tweet) {
           try{
             
             if(verifyFoursquare(body,error)){
-              
               var parsedbody = JSON.parse(body);
-
+              console.log(parsedbody);
               if(parsedbody.meta.code==200){
-                
                 var cityDetails = String(parsedbody.response.checkin.venue.location.city);
                 //Storing data using appbase api
                 client.index({
-                  index: 'Check In',
+                  index: 'checkin',
                   type: 'city',
                   size: 200,
                   id: parsedbody.response.checkin.id,
@@ -71,7 +71,8 @@ stream.on('tweet', function (tweet) {
                      username: parsedbody.response.checkin.user.firstName,
                      photourl: parsedbody.response.checkin.user.photo.prefix+"50x50"+parsedbody.response.checkin.user.photo.suffix,
                      state: parsedbody.response.checkin.venue.location.state,
-                     country: parsedbody.response.checkin.venue.location.country
+                     country: parsedbody.response.checkin.venue.location.country,
+                     location: [parsedbody.response.checkin.venue.location.lat,parsedbody.response.checkin.venue.location.lng]
                   }
                 }).then(function(response) {
                      console.log(cityDetails);
@@ -80,9 +81,7 @@ stream.on('tweet', function (tweet) {
                      console.log(error);
                 });
               }
-            
             }
-          
           }catch(error){
            console.log(error);
           }
