@@ -2,8 +2,7 @@
 //request module is required for the twitter api
 var Twit = require('twit');
 var request = require("request");
-var appbase = require("appbase-js");
-var elasticsearch = require('elasticsearch');
+var Appbase = require("appbase-js");
 var fs = require("fs");
 var content = fs.readFileSync("config.json");
 var jsonContent = JSON.parse(content);
@@ -27,10 +26,13 @@ var T = new Twit({
 //Filter tweets related to swarmapp
 var stream = T.stream('statuses/filter', { track: 'swarmapp', language: 'en' });
 
-  
-var client = new elasticsearch.Client({
-      host: 'https://'+USERNAME+":"+PASSWORD+"@"+HOSTNAME,
-  });
+
+var appbaseObj = new Appbase({
+    "url": "https://scalr.api.appbase.io",
+    "appname": APPNAME,
+    "username": USERNAME,
+    "password": PASSWORD
+});
 
 
 //Streaming of twitter tweets
@@ -43,21 +45,16 @@ stream.on('tweet', function (tweet) {
         var FSid = swarmappUrl.split("/")[2];
         //created url to get data of that checkin from swarmapp
         var FSurl = "https://api.foursquare.com/v2/checkins/resolve?shortId="+FSid+"&oauth_token="+jsonContent.foursquare.oauth_token+"&v=20150919";
-        
         //Getting data from foursquare
         request(FSurl, function(error, response, body) {
           try{
-            
             if(verifyFoursquare(body,error)){
               var parsedbody = JSON.parse(body);
-              console.log(parsedbody);
               if(parsedbody.meta.code==200){
                 var cityDetails = String(parsedbody.response.checkin.venue.location.city);
                 //Storing data using appbase api
-                client.index({
-                  index: 'checkin',
+                appbaseObj.index({
                   type: 'city',
-                  size: 200,
                   id: parsedbody.response.checkin.id,
                   body: {
                      shout: parsedbody.response.checkin.shout,
@@ -74,11 +71,11 @@ stream.on('tweet', function (tweet) {
                      country: parsedbody.response.checkin.venue.location.country,
                      location: [parsedbody.response.checkin.venue.location.lat,parsedbody.response.checkin.venue.location.lng]
                   }
-                }).then(function(response) {
+                }).on('data', function(res) {
                      console.log(cityDetails);
-                     console.log(response);
-                }, function(error) {
-                     console.log(error);
+                     console.log(res);
+                }).on('error', function(err) {
+                     console.log("indexing error: ", err);
                 });
               }
             }
