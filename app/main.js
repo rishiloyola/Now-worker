@@ -52,6 +52,7 @@ stream.on('tweet', function (tweet) {
               var parsedbody = JSON.parse(body);
               if(parsedbody.meta.code==200){
                 var cityDetails = String(parsedbody.response.checkin.venue.location.city);
+                cityDetails = cityDetails.toLowerCase();
                 //Storing data using appbase api
                 appbaseObj.index({
                   type: 'city',
@@ -63,7 +64,7 @@ stream.on('tweet', function (tweet) {
                      latitude: parsedbody.response.checkin.venue.location.lat,
                      longitude: parsedbody.response.checkin.venue.location.lng,
                      venue: parsedbody.response.checkin.venue.name,
-                     city_suggest: cityDetails,
+                     city_suggest: String(parsedbody.response.checkin.venue.location.city),
                      url: swarmappUrl,
                      username: parsedbody.response.checkin.user.firstName,
                      photourl: parsedbody.response.checkin.user.photo.prefix+"50x50"+parsedbody.response.checkin.user.photo.suffix,
@@ -112,7 +113,11 @@ function verifyFoursquare(fsdata,error){
                   if(parsedbody.response.checkin.venue.name){
                     if(parsedbody.response.checkin.shout){
                       if(parsedbody.response.checkin.user.photo.prefix && parsedbody.response.checkin.user.photo.suffix){
-                        return true;
+                        var city = parsedbody.response.checkin.venue.location.city;
+                        city = city.toLowerCase();
+                        if(city){
+                          return true;
+                        }
                       }
                     }
                   }
