@@ -8,7 +8,7 @@ Without further ado, here are the important links: [now worker code](https://git
 
 ##Dependency Installation
 
-Twit api
+Twit module
 
 ```
 $ npm install twit
